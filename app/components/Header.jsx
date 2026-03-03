@@ -2,6 +2,7 @@ import {Suspense} from 'react';
 import {Await, NavLink, useAsyncValue} from 'react-router';
 import {useAnalytics, useOptimisticCart} from '@shopify/hydrogen';
 import {useAside} from '~/components/Aside';
+import logo from '~/assets/logo.svg';
 
 /**
  * @param {HeaderProps}
@@ -10,8 +11,14 @@ export function Header({header, isLoggedIn, cart, publicStoreDomain}) {
   const {shop, menu} = header;
   return (
     <header className="header">
-      <NavLink prefetch="intent" to="/" style={activeLinkStyle} end>
-        <strong>{shop.name}</strong>
+      <NavLink
+        prefetch="intent"
+        to="/"
+        end
+        className={({isActive}) => `header__logo${isActive ? ' active' : ''}`}
+      >
+        <img src={logo} alt="" className="header__logo-img" />
+        <span className="header__logo-text">{shop.name}</span>
       </NavLink>
       <HeaderMenu
         menu={menu}
@@ -45,10 +52,12 @@ export function HeaderMenu({
     <nav className={className} role="navigation">
       {viewport === 'mobile' && (
         <NavLink
+          className={({isActive}) =>
+            `header-menu-item${isActive ? ' active' : ''}`
+          }
           end
           onClick={close}
           prefetch="intent"
-          style={activeLinkStyle}
           to="/"
         >
           Home
@@ -57,7 +66,6 @@ export function HeaderMenu({
       {(menu || FALLBACK_HEADER_MENU).items.map((item) => {
         if (!item.url) return null;
 
-        // if the url is internal, we strip the domain
         const url =
           item.url.includes('myshopify.com') ||
           item.url.includes(publicStoreDomain) ||
@@ -66,12 +74,13 @@ export function HeaderMenu({
             : item.url;
         return (
           <NavLink
-            className="header-menu-item"
+            className={({isActive}) =>
+              `header-menu-item${isActive ? ' active' : ''}`
+            }
             end
             key={item.id}
             onClick={close}
             prefetch="intent"
-            style={activeLinkStyle}
             to={url}
           >
             {item.title}
@@ -89,7 +98,11 @@ function HeaderCtas({isLoggedIn, cart}) {
   return (
     <nav className="header-ctas" role="navigation">
       <HeaderMenuMobileToggle />
-      <NavLink prefetch="intent" to="/account" style={activeLinkStyle}>
+      <NavLink
+        prefetch="intent"
+        to="/account"
+        className={({isActive}) => (isActive ? 'active' : '')}
+      >
         <Suspense fallback="Sign in">
           <Await resolve={isLoggedIn} errorElement="Sign in">
             {(isLoggedIn) => (isLoggedIn ? 'Account' : 'Sign in')}
@@ -133,6 +146,7 @@ function CartBadge({count}) {
   return (
     <a
       href="/cart"
+      className="header__cart"
       onClick={(e) => {
         e.preventDefault();
         open('cart');
@@ -143,9 +157,33 @@ function CartBadge({count}) {
           url: window.location.href || '',
         });
       }}
+      aria-label={`Cart with ${count ?? 0} items`}
     >
-      Cart {count === null ? <span>&nbsp;</span> : count}
+      <CartIcon />
+      {count !== null && count > 0 && (
+        <span className="header__cart-badge">{count}</span>
+      )}
     </a>
+  );
+}
+
+function CartIcon() {
+  return (
+    <svg
+      className="header__cart-icon"
+      xmlns="http://www.w3.org/2000/svg"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden
+    >
+      <circle cx="9" cy="21" r="1" />
+      <circle cx="20" cy="21" r="1" />
+      <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6" />
+    </svg>
   );
 }
 
@@ -209,19 +247,6 @@ const FALLBACK_HEADER_MENU = {
     },
   ],
 };
-
-/**
- * @param {{
- *   isActive: boolean;
- *   isPending: boolean;
- * }}
- */
-function activeLinkStyle({isActive, isPending}) {
-  return {
-    fontWeight: isActive ? 'bold' : undefined,
-    color: isPending ? 'grey' : 'black',
-  };
-}
 
 /** @typedef {'desktop' | 'mobile'} Viewport */
 /**

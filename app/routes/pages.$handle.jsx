@@ -1,5 +1,6 @@
 import {useLoaderData} from 'react-router';
 import {redirectIfHandleIsLocalized} from '~/lib/redirect';
+import {ContactForm} from '~/components/ContactForm';
 
 /**
  * @type {Route.MetaFunction}
@@ -64,6 +65,10 @@ function loadDeferredData({context}) {
 export default function Page() {
   /** @type {LoaderReturnData} */
   const {page} = useLoaderData();
+
+  if (page.handle === 'contact') {
+    return <ContactForm />;
+  }
 
   return (
     <div className="page">

@@ -10,13 +10,47 @@ export function Footer({footer: footerPromise, header, publicStoreDomain}) {
       <Await resolve={footerPromise}>
         {(footer) => (
           <footer className="footer">
-            {footer?.menu && header.shop.primaryDomain?.url && (
-              <FooterMenu
-                menu={footer.menu}
-                primaryDomainUrl={header.shop.primaryDomain.url}
-                publicStoreDomain={publicStoreDomain}
-              />
-            )}
+            <div className="footer__inner">
+              <div className="footer__top">
+                <div>
+                  <div className="footer__brand">{header?.shop?.name}</div>
+                  <p className="footer__tagline">
+                    Quality products for the modern lifestyle. Free shipping on
+                    orders over $50.
+                  </p>
+                </div>
+                <div className="footer__column">
+                  <h4>Shop</h4>
+                  <nav className="footer__links">
+                    <NavLink prefetch="intent" to="/collections/all">
+                      All Products
+                    </NavLink>
+                    <NavLink prefetch="intent" to="/search">
+                      Search
+                    </NavLink>
+                    <NavLink prefetch="intent" to="/contact">
+                      Contact
+                    </NavLink>
+                  </nav>
+                </div>
+                <div className="footer__column">
+                  <h4>Support</h4>
+                  {footer?.menu && header.shop.primaryDomain?.url && (
+                    <FooterMenu
+                      menu={footer.menu}
+                      primaryDomainUrl={header.shop.primaryDomain.url}
+                      publicStoreDomain={publicStoreDomain}
+                      className="footer__links"
+                    />
+                  )}
+                </div>
+              </div>
+              <div className="footer__bottom">
+                <span style={{fontSize: '0.875rem', opacity: 0.7}}>
+                  © {new Date().getFullYear()} {header?.shop?.name}. All rights reserved.
+                </span>
+              </div>
+            </div>
           </footer>
         )}
       </Await>
@@ -31,9 +65,9 @@ export function Footer({footer: footerPromise, header, publicStoreDomain}) {
  *   publicStoreDomain: string;
  * }}
  */
-function FooterMenu({menu, primaryDomainUrl, publicStoreDomain}) {
+function FooterMenu({menu, primaryDomainUrl, publicStoreDomain, className}) {
   return (
-    <nav className="footer-menu" role="navigation">
+    <nav className={className || 'footer-menu'} role="navigation">
       {(menu || FALLBACK_FOOTER_MENU).items.map((item) => {
         if (!item.url) return null;
         // if the url is internal, we strip the domain
